@@ -7,6 +7,7 @@
 class HelpWindow {
     private:
         Mat helpWin;
+        bool behaviourMode;
         //-- Config Display Values
         double Scale;
         double middleLength;
@@ -54,6 +55,23 @@ class HelpWindow {
         string vXInfo;
         string vYInfo;
         string vThetaInfo;
+        double modelX;
+        double modelY;
+        double modelTheta;
+        double agentVX;
+        double agentVY;
+        double agentVTheta;
+        int maxColor;
+        double vMoveVectorX;
+        double vMoveVectorY;
+        double vRotateVectorX;
+        double vRotateVectorY;
+        double xDestPosLength;
+        double yDestPosLength;
+        double thetaDestPosLength;
+        double xDestPosWidth;
+        double yDestPosWidth;
+        double thetaDestPosWidth;
         //-- Status Circle
         double statusPosition;
         double speedPositionWidth;
@@ -69,6 +87,17 @@ class HelpWindow {
         int fadingSpeed;
         int counter;
         int statusCircleSize;
+        double destinationX;
+        double destinationY;
+        double destX;
+        double destY;
+        double destTheta;
+        string destXInfo;
+        string destYInfo;
+        string destThetaInfo;
+        bool changePos;
+        int posCounter;
+        double agentSize;
     public:
         void updateHelpWindow(bool);
         HelpWindow();
@@ -79,6 +108,8 @@ class HelpWindow {
         void resetError();
         void viewPosition(double, double, double);
         void viewVelocity(double, double, double);
+        void setMode();
+        void setDestination(double, double, double);
 };
 
 #endif // HELPWINDOW_HPP

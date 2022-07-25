@@ -143,9 +143,9 @@ int World::updateWindow() {
                 break;
                 case (int('b')):
                     plannerMode = !plannerMode;
+                    status.setMode();
                 break;
             }
-
             if (plannerMode) {
                 if (planner.getState() == 1) {
                     cv::Point3d robotPose;
@@ -158,7 +158,6 @@ int World::updateWindow() {
                     robot.setVelocity(0, 0, 0);
                 }
             }
-
             if ( mouseFlag == 0 || mouseFlag == -1 || mouseFlag == 2) {
                 robot.setVelocity(0, 0, 0);
             }
@@ -226,12 +225,6 @@ void World::Mouse(int event, int x, int y, int flags){
             switch(event){
                 //-- Click Left Button to Pick Agent
                 case EVENT_LBUTTONDOWN:
-                    // cout << "x : " << -(x - windowLength * half * modelScale) << " y : " << (y - windowWidth * half * modelScale) << endl;
-                    // cout << mouseDistance << endl;
-                    // cout << "x2 : " << sqrt(pow(robot.accessX() * modelScale - (x - windowLength * half * modelScale), 2)) << endl;
-                    // cout << "y2 : " << sqrt(pow(robot.accessY() * modelScale - (y - windowWidth * half * modelScale), 2)) << endl;
-                    // cout << robot.accessX() << endl;
-                    // cout << "--------------------" << endl;
                     mouseDistance = sqrt(pow(-robot.accessX() * modelScale - (x - windowLength * half * modelScale), 2) + pow(robot.accessY() * modelScale - (y - windowWidth * half * modelScale), 2));
                     if (mouseDistance < clickAreaRadius) {
                         clickedColorValue = 100;
@@ -241,6 +234,7 @@ void World::Mouse(int event, int x, int y, int flags){
                             cv::Point2d meter = pixel2Meter(cv::Point2d(x, y));
                             planner.setDestination(meter);
                             planner.setState(1);
+                            status.setDestination(x, y, robot.accessTheta());
                         }
                     }
                 break;

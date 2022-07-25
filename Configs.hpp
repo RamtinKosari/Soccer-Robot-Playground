@@ -75,17 +75,13 @@ extern double robotGreen;
 extern double robotRed;
 //-- Color Value When Clicked
 extern int clickedColorValue;
-//-- Speed Increase/Decrease Value
-extern double moveSpeedValue;
-extern double rotateSpeedValue;
 
 //-------------------------
 //--| Movements Configs |--
 //-------------------------
-//-- Robot Move (in Pixels)
-extern double robotMoveValue;
-//-- Robot Rotation (in Degree) -- Should be 1
-extern double robotRotationValue;
+//-- Speed Increase/Decrease Value
+extern double moveSpeedValue;
+extern double rotateSpeedValue;
 //-- Max Movement Speed (in m/s)
 extern double maxMovementSpeed;
 //-- Max Rotation Speed (in Degree/s)

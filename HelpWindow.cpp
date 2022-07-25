@@ -21,11 +21,11 @@ double helpWindowFontSize;
 int helpWindowTextBlue = 255 ;
 int helpWindowTextGreen = 255;
 int helpWindowTextRed = 0;
-
 //-- Constructor to Set Default Values
 HelpWindow::HelpWindow() {
+    behaviourMode = false;
     Scale = modelScale * 12;
-    if (Scale >= 2500){
+    if (Scale >= 2500) {
         helpWindowFontSize = 1.6;
     } else if (Scale > 1550 && Scale < 2500) {
         helpWindowFontSize = 1.1;
@@ -50,6 +50,12 @@ HelpWindow::HelpWindow() {
     keyInfoPositionX = helpWindowLength * modelScale / 70;
     keyInfoPositionY = helpWindowWidth * modelScale / 3.85;
     spaceBetweenLines = helpWindowWidth * modelScale / 25;
+    xDestPosLength = helpWindowLength * modelScale * 0.05;
+    yDestPosLength = helpWindowLength * modelScale * 0.05;
+    thetaDestPosLength = helpWindowLength * modelScale * 0.05;
+    xDestPosWidth = helpWindowWidth * modelScale * 0.70;
+    yDestPosWidth = helpWindowWidth * modelScale * 0.75;
+    thetaDestPosWidth = helpWindowWidth * modelScale * 0.80;
     //-- Activity Circle
     state = 1;
     counter = 0;
@@ -63,7 +69,7 @@ HelpWindow::HelpWindow() {
     activityCircleRadius = modelScale * 0.1;
     //-- Agent
     agentCenterX = middleLength;
-    agentCenterY = helpWindowWidth * modelScale * 6 / 8;
+    agentCenterY = helpWindowWidth * modelScale * 5.5 / 8;
     xPosLength = helpWindowLength * modelScale * 0.02;
     yPosLength = helpWindowLength * modelScale * 0.02;
     thetaPosLength = helpWindowLength * modelScale * 0.02;
@@ -79,117 +85,185 @@ HelpWindow::HelpWindow() {
     //-- Velocity and Position
     speedPositionWidth = helpWindowWidth * modelScale * 0.89;
     speedPositionLength = helpWindowLength * modelScale / 3.1;
+    maxColor = 0;
+    posCounter = 0;
+    changePos = false;
+    agentSize = robotSize * modelScale / 1.5;
 }
 
 //-- Makes Help Window
 void HelpWindow::updateHelpWindow(bool value) {
-    //-- Set Active/Deactive Value
-    active = value;
     //-- Creates Help Window
     helpWin = Mat(helpWindowWidth * modelScale, helpWindowLength * modelScale, CV_8UC3, Scalar(10,10,10));
-    //------------
-    //--| Keys |--
-    //------------
-    //-- Definition of Points and Strings
-    //- Key I :
-    string keyI = "I";
-    string infoI = "Increase Velocity in X Axis";
-    Point keyI1(keyPositionX + keyPaddingLength + (keySize) * 2, keyPositionY - (keySize + keyPaddingWidth));
-    Point posKeyI(keyPositionX + keyPaddingLength + (keySize) * 2.5 - textPositionLength, keyPositionY - (keySize * half + keyPaddingWidth) + textPositionWidth);
-    Point keyI2(keyPositionX + keyPaddingLength + (keySize) * 3, keyPositionY + keySize - (keySize + keyPaddingWidth));
-    rectangle(helpWin, keyI1, keyI2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyI, posKeyI, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key H :
-    string keyH = "H";
-    string infoH = "Increase Velocity in Y Axis";
-    Point keyH1(keyPositionX, keyPositionY);
-    Point posKeyH(keyPositionX + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
-    Point keyH2(keyPositionX + keySize, keyPositionY + keySize);
-    rectangle(helpWin, keyH1, keyH2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyH, posKeyH, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key J :
-    string keyJ = "J";
-    string infoJ = "Decrease Rotation Velocity";
-    Point keyJ1(keyPositionX + (keySize + keyPaddingLength) * 1, keyPositionY);
-    Point posKeyJ(keyPositionX + (keySize + keyPaddingLength) * 1.05 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
-    Point keyJ2(keyPositionX + keySize + (keySize + keyPaddingLength) * 1, keyPositionY + keySize);
-    rectangle(helpWin, keyJ1, keyJ2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyJ, posKeyJ, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key K :
-    string keyK = "K";
-    string infoK = "Stops Agent";
-    Point keyK1(keyPositionX + (keySize + keyPaddingLength) * 2, keyPositionY);
-    Point posKeyK(keyPositionX + (keySize + keyPaddingLength) * 2 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
-    Point keyK2(keyPositionX + keySize + (keySize + keyPaddingLength) * 2, keyPositionY + keySize);
-    rectangle(helpWin, keyK1, keyK2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyK, posKeyK, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key L :
-    string keyL = "L";
-    string infoL = "Increase Rotation Velocity";
-    Point keyL1(keyPositionX + (keySize + keyPaddingLength) * 3, keyPositionY);
-    Point posKeyL(keyPositionX + (keySize + keyPaddingLength) * 3.05 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
-    Point keyL2(keyPositionX + keySize + (keySize + keyPaddingLength) * 3, keyPositionY + keySize);
-    rectangle(helpWin, keyL1, keyL2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyL, posKeyL, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key Semicolon :
-    string keySemicolon = ";";
-    string infoSemicolon = "Decrease Velocity in Y Axis";
-    Point keysemicolon1(keyPositionX + (keySize + keyPaddingLength) * 4, keyPositionY);
-    Point posKeySemicolon(keyPositionX + (keySize + keyPaddingLength) * 4.1 + keyPaddingLength - textPositionLength, keyPositionY + keySize * 0.45 + textPositionWidth);
-    Point keysemicolon2(keyPositionX + keySize + (keySize + keyPaddingLength) * 4, keyPositionY + keySize);
-    rectangle(helpWin, keysemicolon1, keysemicolon2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keySemicolon, posKeySemicolon, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //- Key Colon :
-    string keyColon = ",";
-    string infoColon = "Decrease Velocity in X Axis";
-    Point keyColon1(keyPositionX + keyPaddingLength + (keySize) * 3, keyPositionY + (keySize + keyPaddingWidth));
-    Point posKeyColon(keyPositionX + keyPaddingLength + (keySize) * 3.5 - textPositionLength, keyPositionY + keySize * 2 - textPositionWidth);
-    Point keyColon2(keyPositionX + keyPaddingLength + (keySize) * 4, keyPositionY + keySize + (keySize + keyPaddingWidth));
-    rectangle(helpWin, keyColon1, keyColon2, Scalar(136,117,54), keyLineSize, 8, 0);
-    putText(helpWin, keyColon, posKeyColon, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    //-----------------
-    //--| Keys Info |--
-    //-----------------
-    //- Key I :
-    Point textI(keyPositionX + keyPaddingLength, keyInfoPositionY);
-    Point defineI(keyInfoPositionX, keyInfoPositionY);
-    putText(helpWin, infoI, textI, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "I > ", defineI, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key H :
-    Point textH(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 1);
-    Point defineH(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 1);
-    putText(helpWin, infoH, textH, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "H > ", defineH, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key J :
-    Point textJ(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 2);
-    Point defineJ(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 2);
-    putText(helpWin, infoJ, textJ, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "J > ", defineJ, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key K :
-    Point textK(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 3);
-    Point defineK(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 3);
-    putText(helpWin, infoK, textK, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "K > ", defineK, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key L :
-    Point textL(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 4);
-    Point defineL(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 4);
-    putText(helpWin, infoL, textL, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "L > ", defineL, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key ; :
-    Point textSemicolon(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 5);
-    Point defineSemicolon(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 5);
-    putText(helpWin, infoSemicolon, textSemicolon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, "; > ", defineSemicolon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Key , :
-    Point textColon(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 6);
-    Point defineColon(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 6);
-    putText(helpWin, infoColon, textColon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
-    putText(helpWin, ", > ", defineColon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //-----------------------------
-    //--| Velocity and Position |--
-    //-----------------------------
+    //-- Set Active/Deactive Value
+    active = value;
+    //-- Point Center
+    Point agentCenter(agentCenterX, agentCenterY);
+    if (behaviourMode) {
+        agentCenterX = middleLength;
+        if (changePos == true) {
+            posCounter++;
+            //-- Position of Destination Point
+            agentCenterY -= posCounter;
+            agentSize += robotSize * modelScale * posCounter++ / 50;
+        }
+        if ((agentCenterY) < helpWindowWidth * modelScale * half) {
+            changePos = false;
+            posCounter = 0;
+        }
+        putText(helpWin, "X : " + destXInfo, Point(xDestPosLength, xDestPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "Y : " + destYInfo, Point(yDestPosLength, yDestPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "Theta : " + destThetaInfo, Point(thetaDestPosLength, thetaDestPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+
+    } else if (!behaviourMode) {
+        agentCenterX = middleLength;
+        if (changePos == true) {
+            posCounter++;
+            //-- Position of Destination Point
+            agentCenterY += posCounter;
+            if (agentSize > robotSize * modelScale) {
+                agentSize -= robotSize * modelScale * posCounter++ / 50;
+            }
+        }
+        if ((agentCenterY) > helpWindowWidth * modelScale * 5.5 / 8) {
+            changePos = false;
+        }
+        //------------
+        //--| Keys |--
+        //------------
+        //-- Definition of Points and Strings
+        //- Key I :
+        string keyI = "I";
+        string infoI = "Increase Velocity in X Axis";
+        Point keyI1(keyPositionX + keyPaddingLength + (keySize) * 2, keyPositionY - (keySize + keyPaddingWidth));
+        Point posKeyI(keyPositionX + keyPaddingLength + (keySize) * 2.5 - textPositionLength, keyPositionY - (keySize * half + keyPaddingWidth) + textPositionWidth);
+        Point keyI2(keyPositionX + keyPaddingLength + (keySize) * 3, keyPositionY + keySize - (keySize + keyPaddingWidth));
+        rectangle(helpWin, keyI1, keyI2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyI, posKeyI, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key H :
+        string keyH = "H";
+        string infoH = "Increase Velocity in Y Axis";
+        Point keyH1(keyPositionX, keyPositionY);
+        Point posKeyH(keyPositionX + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
+        Point keyH2(keyPositionX + keySize, keyPositionY + keySize);
+        rectangle(helpWin, keyH1, keyH2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyH, posKeyH, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key J :
+        string keyJ = "J";
+        string infoJ = "Decrease Rotation Velocity";
+        Point keyJ1(keyPositionX + (keySize + keyPaddingLength) * 1, keyPositionY);
+        Point posKeyJ(keyPositionX + (keySize + keyPaddingLength) * 1.05 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
+        Point keyJ2(keyPositionX + keySize + (keySize + keyPaddingLength) * 1, keyPositionY + keySize);
+        rectangle(helpWin, keyJ1, keyJ2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyJ, posKeyJ, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key K :
+        string keyK = "K";
+        string infoK = "Stops Agent";
+        Point keyK1(keyPositionX + (keySize + keyPaddingLength) * 2, keyPositionY);
+        Point posKeyK(keyPositionX + (keySize + keyPaddingLength) * 2 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
+        Point keyK2(keyPositionX + keySize + (keySize + keyPaddingLength) * 2, keyPositionY + keySize);
+        rectangle(helpWin, keyK1, keyK2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyK, posKeyK, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key L :
+        string keyL = "L";
+        string infoL = "Increase Rotation Velocity";
+        Point keyL1(keyPositionX + (keySize + keyPaddingLength) * 3, keyPositionY);
+        Point posKeyL(keyPositionX + (keySize + keyPaddingLength) * 3.05 + keyPaddingLength - textPositionLength, keyPositionY + keySize * half + textPositionWidth);
+        Point keyL2(keyPositionX + keySize + (keySize + keyPaddingLength) * 3, keyPositionY + keySize);
+        rectangle(helpWin, keyL1, keyL2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyL, posKeyL, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key Semicolon :
+        string keySemicolon = ";";
+        string infoSemicolon = "Decrease Velocity in Y Axis";
+        Point keysemicolon1(keyPositionX + (keySize + keyPaddingLength) * 4, keyPositionY);
+        Point posKeySemicolon(keyPositionX + (keySize + keyPaddingLength) * 4.1 + keyPaddingLength - textPositionLength, keyPositionY + keySize * 0.45 + textPositionWidth);
+        Point keysemicolon2(keyPositionX + keySize + (keySize + keyPaddingLength) * 4, keyPositionY + keySize);
+        rectangle(helpWin, keysemicolon1, keysemicolon2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keySemicolon, posKeySemicolon, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //- Key Colon :
+        string keyColon = ",";
+        string infoColon = "Decrease Velocity in X Axis";
+        Point keyColon1(keyPositionX + keyPaddingLength + (keySize) * 3, keyPositionY + (keySize + keyPaddingWidth));
+        Point posKeyColon(keyPositionX + keyPaddingLength + (keySize) * 3.5 - textPositionLength, keyPositionY + keySize * 2 - textPositionWidth);
+        Point keyColon2(keyPositionX + keyPaddingLength + (keySize) * 4, keyPositionY + keySize + (keySize + keyPaddingWidth));
+        rectangle(helpWin, keyColon1, keyColon2, Scalar(136,117,54), keyLineSize, 8, 0);
+        putText(helpWin, keyColon, posKeyColon, FONT_HERSHEY_TRIPLEX, helpWindowFontSize, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        //-----------------
+        //--| Keys Info |--
+        //-----------------
+        //- Key I :
+        Point textI(keyPositionX + keyPaddingLength, keyInfoPositionY);
+        Point defineI(keyInfoPositionX, keyInfoPositionY);
+        putText(helpWin, infoI, textI, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "I > ", defineI, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key H :
+        Point textH(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 1);
+        Point defineH(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 1);
+        putText(helpWin, infoH, textH, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "H > ", defineH, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key J :
+        Point textJ(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 2);
+        Point defineJ(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 2);
+        putText(helpWin, infoJ, textJ, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "J > ", defineJ, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key K :
+        Point textK(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 3);
+        Point defineK(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 3);
+        putText(helpWin, infoK, textK, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "K > ", defineK, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key L :
+        Point textL(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 4);
+        Point defineL(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 4);
+        putText(helpWin, infoL, textL, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "L > ", defineL, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key ; :
+        Point textSemicolon(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 5);
+        Point defineSemicolon(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 5);
+        putText(helpWin, infoSemicolon, textSemicolon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, "; > ", defineSemicolon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Key , :
+        Point textColon(keyPositionX + keyPaddingLength, keyInfoPositionY + spaceBetweenLines * 6);
+        Point defineColon(keyInfoPositionX, keyInfoPositionY + spaceBetweenLines * 6);
+        putText(helpWin, infoColon, textColon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(keyTextBlue, keyTextGreen, keyTextRed));
+        putText(helpWin, ", > ", defineColon, FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //-----------------------------
+        //--| Velocity and Position |--
+        //-----------------------------
+        //-- Velocity Circle
+        //- Movement
+        vMoveVectorX = agentCenterX + agentVY * modelScale;
+        vMoveVectorY = agentCenterY - agentVX * modelScale;
+        double velocityRadius = sqrt(pow(vMoveVectorX - agentCenterX, 2) + pow(vMoveVectorY - agentCenterY, 2));
+        Point velocityVector(vMoveVectorX, vMoveVectorY);
+        circle(helpWin, agentCenter, velocityRadius, Scalar(255, 50, 3), 1, 8, 0);
+        arrowedLine(helpWin, agentCenter, velocityVector, Scalar(255, 50, 2), 2, 8, 0);
+        //- Rotation
+        vRotateVectorX = agentCenterX - agentVTheta * cos(-modelTheta) * modelScale;
+        vRotateVectorY = agentCenterY - agentVTheta * sin(-modelTheta) * modelScale;
+        double rotationRadius = sqrt(pow(vRotateVectorX - agentCenterX, 2) + pow(vRotateVectorY - agentCenterY, 2));
+        Point rotationVector(vRotateVectorX, vRotateVectorY);
+        circle(helpWin, agentCenter, rotationRadius, Scalar(25, 150, 255), 1, 8, 0);
+        arrowedLine(helpWin, agentCenter, rotationVector, Scalar(25, 150, 255), 1, 8, 0);
+        //-- Position
+        //- X
+        putText(helpWin, "X: " + xInfo, Point(xPosLength, xPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Y
+        putText(helpWin, "Y: " + yInfo, Point(yPosLength, yPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- Thetha
+        putText(helpWin, "Theta: " + thetaInfo, Point(thetaPosLength, thetaPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- vX
+        putText(helpWin, "vX: " + vXInfo, Point(vXPosLength, vXPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- vY
+        putText(helpWin, "vY: " + vYInfo, Point(vYPosLength, vYPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //- vTheta
+        putText(helpWin, "vTheta: " + vThetaInfo, Point(vThetaPosLength, vThetaPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
+        //-- Velocity Vector Viewer
+        Point speedChange(middleLength - speedPositionLength, speedPositionWidth);
+        putText(helpWin, speedStatus, speedChange, FONT_HERSHEY_DUPLEX, helpWindowFontSize / 1.5, Scalar(179,222,245));
+    } else {
+
+    }
     //-- Agent
-    //- Points
     double agentTheta = M_PI / 2;
     double agentDirectionX;
     double agentDirectionY;
@@ -197,9 +271,6 @@ void HelpWindow::updateHelpWindow(bool value) {
     double agentRightY;
     double agentLeftX;
     double agentLeftY;
-    double agentSize = robotSize * modelScale;
-    //-- Point Center
-    Point agentCenter(agentCenterX, agentCenterY);
     //-- Point Direction
     agentDirectionX = agentCenterX - agentSize * cos(agentTheta);
     agentDirectionY = agentCenterY - agentSize * sin(agentTheta);
@@ -213,36 +284,18 @@ void HelpWindow::updateHelpWindow(bool value) {
     agentLeftY = agentCenterY - agentSize * sin(agentTheta - (robotSharpness * M_PI / 180));
     Point agentLeft(agentLeftX, agentLeftY);
     //-- DR Line
-    line(helpWin, agentDirection, agentRight, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), robotLineSize, 8, 0);
+    line(helpWin, agentDirection, agentRight, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), lineSize, 8, 0);
     //-- DL Line
-    line(helpWin, agentDirection, agentLeft, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), robotLineSize, 8, 0);
+    line(helpWin, agentDirection, agentLeft, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), lineSize, 8, 0);
     //-- OR Line
-    line(helpWin, agentCenter, agentRight, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), robotLineSize, 8, 0);
+    line(helpWin, agentCenter, agentRight, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), lineSize, 8, 0);
     //-- OL Line
-    line(helpWin, agentCenter, agentLeft, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), robotLineSize, 8, 0);
-    //-- Position
-    //- X
-    putText(helpWin, "X: " + xInfo, Point(xPosLength, xPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Y
-    putText(helpWin, "Y: " + yInfo, Point(yPosLength, yPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- Thetha
-    putText(helpWin, "Theta: " + thetaInfo, Point(thetaPosLength, thetaPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- vX
-    putText(helpWin, "vX: " + vXInfo, Point(vXPosLength, vXPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- vY
-    putText(helpWin, "vY: " + vYInfo, Point(vYPosLength, vYPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-    //- vTheta
-    putText(helpWin, "vTheta: " + vThetaInfo, Point(vThetaPosLength, vThetaPosWidth), FONT_HERSHEY_SIMPLEX, helpWindowFontSize * 0.7, Scalar(95,169,225));
-
-    //-- Velocity Vector Viewer
-    Point speedChange(middleLength - speedPositionLength, speedPositionWidth);
-    putText(helpWin, speedStatus, speedChange, FONT_HERSHEY_DUPLEX, helpWindowFontSize / 1.5, Scalar(179,222,245));
+    line(helpWin, agentCenter, agentLeft, Scalar(255 - clickedColorValue, 112 - clickedColorValue, 190 - clickedColorValue), lineSize, 8, 0);
     //-- Activity Status
     Point activityCircle(middleLength, activityCirclePosition);
     Point activityStatus(middleLength - statusPosition, activityStatusPosition);
     circle(helpWin, activityCircle, activityCircleRadius, Scalar(0, Fader(), stoppedValue), -1, 8, 0);
     putText(helpWin, status, activityStatus, FONT_HERSHEY_DUPLEX, helpWindowFontSize / 1.7, Scalar(0, activeValue, stoppedValue));
-    
     //-- Show Help Window
     imshow("Help Window", helpWin);
 }
@@ -255,7 +308,7 @@ void HelpWindow::updateStatus(int option, double velocity) {
         speedStatus = "Y Axis Velocity Changed";
     } else if(option == 3) {
         speedStatus = "Rotation Velocity Changed";
-    } else if (option == 0){
+    } else if (option == 0) {
         speedStatus = " ";
     }
 }
@@ -266,8 +319,7 @@ void HelpWindow::updateError(string err) {
 }
 
 //-- Reset Error Data
-void HelpWindow::resetError()
-{
+void HelpWindow::resetError() {
     error = " ";
 }
 
@@ -312,9 +364,15 @@ void HelpWindow::viewPosition(double inputX, double inputY, double inputTheta) {
     ostringstream x;
     ostringstream y;
     ostringstream theta;
+    modelX = inputX;
+    modelY = inputY;
+    modelTheta = inputTheta;
     x << setprecision(2);
     y << setprecision(2);
     theta << setprecision(4);
+    x << fixed;
+    y << fixed;
+    theta << fixed;
     x << inputX;
     y << inputY;
     theta << inputTheta;
@@ -327,13 +385,47 @@ void HelpWindow::viewVelocity(double inputX, double inputY, double inputTheta) {
     ostringstream vX;
     ostringstream vY;
     ostringstream vTheta;
+    agentVX = inputX;
+    agentVY = inputY;
+    agentVTheta = inputTheta;
     vX << setprecision(2);
     vY << setprecision(2);
     vTheta << setprecision(2);
+    vX << fixed;
+    vY << fixed;
+    vTheta << fixed;
     vX << inputX;
     vY << inputY;
     vTheta << inputTheta;
     vXInfo = vX.str();
     vYInfo = vY.str();
     vThetaInfo = vTheta.str();
+}
+
+void HelpWindow::setDestination(double inputX, double inputY, double inputTheta) {
+    ostringstream x;
+    ostringstream y;
+    ostringstream theta;
+    destX = inputX;
+    destY = inputY;
+    destTheta = inputTheta;
+    x << setprecision(2);
+    y << setprecision(2);
+    theta << setprecision(2);
+    x << fixed;
+    y << fixed;
+    theta << fixed;
+    inputX = -(inputX - windowLength * half * modelScale) / modelScale;
+    inputY = (inputY - windowWidth * half * modelScale) / modelScale;
+    x << inputX;
+    y << inputY;
+    theta << inputTheta;
+    destXInfo = x.str();
+    destYInfo = y.str();
+    destThetaInfo = theta.str();
+}
+
+void HelpWindow::setMode() {
+    behaviourMode = !behaviourMode;
+    changePos = !changePos;
 }
